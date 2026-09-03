@@ -349,29 +349,64 @@ document.addEventListener("DOMContentLoaded", ()=>{
   onScroll();
   window.addEventListener("scroll", onScroll);
 
-  /* Mobile menu */
+  /* Mobile menu + cart drawer elements */
   const menuToggle = document.getElementById("menuToggle");
   const mainNav = document.getElementById("mainNav");
   const overlay = document.getElementById("overlay");
-
-  function closeMenu(){ mainNav.classList.remove("is-open"); overlay.classList.remove("is-active"); }
-  menuToggle.addEventListener("click", ()=>{
-    mainNav.classList.toggle("is-open");
-    overlay.classList.toggle("is-active");
-  });
-  mainNav.querySelectorAll("a").forEach(a=> a.addEventListener("click", closeMenu));
-
-  /* Cart drawer */
   const cartDrawer = document.getElementById("cartDrawer");
   const cartToggle = document.getElementById("cartToggle");
   const cartClose = document.getElementById("cartClose");
 
-  function openCart(){ cartDrawer.classList.add("is-open"); overlay.classList.add("is-active"); }
-  function closeCart(){ cartDrawer.classList.remove("is-open"); overlay.classList.remove("is-active"); }
+  /* Shared body scroll lock — prevents the classic mobile "fixed panel
+     jumps/flickers while the page scrolls behind it" glitch, and restores
+     the exact scroll position on close instead of snapping to top. */
+  let lockedScrollY = 0;
+  function lockBodyScroll(){
+    if(document.body.classList.contains("no-scroll")) return;
+    lockedScrollY = window.scrollY;
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.classList.add("no-scroll");
+  }
+  function unlockBodyScroll(){
+    if(!document.body.classList.contains("no-scroll")) return;
+    document.body.classList.remove("no-scroll");
+    document.body.style.top = "";
+    window.scrollTo(0, lockedScrollY);
+  }
+  function syncBodyLock(){
+    const anyOpen = mainNav.classList.contains("is-open") || cartDrawer.classList.contains("is-open");
+    if(anyOpen) lockBodyScroll(); else unlockBodyScroll();
+  }
+
+  function openMenu(){
+    mainNav.classList.add("is-open");
+    menuToggle.classList.add("is-open");
+    overlay.classList.add("is-active");
+    syncBodyLock();
+  }
+  function closeMenu(){
+    mainNav.classList.remove("is-open");
+    menuToggle.classList.remove("is-open");
+    overlay.classList.remove("is-active");
+    syncBodyLock();
+  }
+  menuToggle.addEventListener("click", ()=>{
+    mainNav.classList.contains("is-open") ? closeMenu() : openMenu();
+  });
+  mainNav.querySelectorAll("a").forEach(a=> a.addEventListener("click", closeMenu));
+
+  function openCart(){ cartDrawer.classList.add("is-open"); overlay.classList.add("is-active"); syncBodyLock(); }
+  function closeCart(){ cartDrawer.classList.remove("is-open"); overlay.classList.remove("is-active"); syncBodyLock(); }
 
   cartToggle.addEventListener("click", openCart);
   cartClose.addEventListener("click", closeCart);
   overlay.addEventListener("click", ()=>{ closeCart(); closeMenu(); });
+
+  /* Keep things sane if the viewport crosses the mobile breakpoint
+     (e.g. rotating a tablet, or resizing a browser window) while open. */
+  window.addEventListener("resize", ()=>{
+    if(window.innerWidth > 760) closeMenu();
+  });
 
   /* Filters + grid */
   renderFilters();

@@ -30,6 +30,9 @@ body{
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
+body.no-scroll{
+  overflow:hidden; position:fixed; width:100%;
+}
 img{ max-width:100%; display:block; }
 a{ color:inherit; text-decoration:none; }
 button{ font-family:inherit; cursor:pointer; background:none; border:none; color:inherit; }
@@ -123,8 +126,14 @@ ul{ list-style:none; }
 .nav-link:hover{ color:var(--cream); }
 .nav-link:hover::after{ right:0; }
 
-.menu-toggle{ display:none; flex-direction:column; gap:5px; width:26px; }
-.menu-toggle span{ height:1px; background:var(--cream); width:100%; }
+.menu-toggle{ display:none; flex-direction:column; gap:5px; width:26px; position:relative; z-index:220; }
+.menu-toggle span{
+  height:1px; background:var(--cream); width:100%; transform-origin:center;
+  transition:transform .3s ease, opacity .3s ease;
+}
+.menu-toggle.is-open span:nth-child(1){ transform:translateY(6px) rotate(45deg); }
+.menu-toggle.is-open span:nth-child(2){ opacity:0; }
+.menu-toggle.is-open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg); }
 
 .cart-toggle{ position:relative; width:26px; height:26px; color:var(--cream); }
 .cart-toggle svg{ width:100%; height:100%; }
