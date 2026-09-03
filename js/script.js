@@ -37,6 +37,8 @@ function mountHeroVideo(){
   tag.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(tag);
 
+  let hideCoverTimer = null;
+
   window.onYouTubeIframeAPIReady = function(){
     const player = new YT.Player("heroVideoWrap", {
       videoId: id,
@@ -50,7 +52,24 @@ function mountHeroVideo(){
       events: {
         onReady: (e)=>{ e.target.mute(); forceTopQuality(e.target); e.target.playVideo(); },
         onPlaybackQualityChange: (e)=> forceTopQuality(e.target),
-        onStateChange: (e)=>{ if(e.data === YT.PlayerState.PLAYING) forceTopQuality(e.target); },
+        onStateChange: (e)=>{
+          // Only reveal the video while it's actually playing smoothly — this
+          // hides YouTube's own loading/buffering UI (title, logo, prev/next
+          // arrows) so it reads as a normal background video instead of an
+          // embed. Any other state (buffering after a quality switch, cued,
+          // paused, ended...) brings the cover back rather than flashing chrome.
+          const cover = document.getElementById("heroVideoCover");
+          if(!cover) return;
+          clearTimeout(hideCoverTimer);
+          if(e.data === YT.PlayerState.PLAYING){
+            forceTopQuality(e.target);
+            // Give YouTube's own title/logo overlay time to auto-fade
+            // before we reveal the frame underneath.
+            hideCoverTimer = setTimeout(()=> cover.classList.add("is-hidden"), 4000);
+          } else {
+            cover.classList.remove("is-hidden");
+          }
+        },
       }
     });
   };
