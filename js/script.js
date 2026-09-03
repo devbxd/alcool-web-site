@@ -147,6 +147,49 @@ function bottleSVG(product){
   </svg>`;
 }
 
+/* -------- Wishlist state -------- */
+let wishlist = JSON.parse(localStorage.getItem("xxx_wishlist") || "[]");
+
+function isWished(id){ return wishlist.includes(id); }
+
+function saveWishlist(){
+  localStorage.setItem("xxx_wishlist", JSON.stringify(wishlist));
+  renderWishlist();
+}
+
+function toggleWishlist(id){
+  wishlist = isWished(id) ? wishlist.filter(w=>w!==id) : [...wishlist, id];
+  saveWishlist();
+}
+
+function renderWishlist(){
+  const wrap = document.getElementById("wishlistItems");
+  const countEl = document.getElementById("wishlistCount");
+  if(!wrap || !countEl) return;
+
+  countEl.textContent = wishlist.length;
+  const items = wishlist.map(id => PRODUCTS.find(p=>p.id===id)).filter(Boolean);
+
+  if(items.length === 0){
+    wrap.innerHTML = `<p class="cart-empty">Your wishlist is empty for now.</p>`;
+    return;
+  }
+
+  wrap.innerHTML = items.map(p => `
+    <div class="cart-item">
+      <div class="cart-item__thumb">${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">` : bottleSVG(p)}</div>
+      <div class="cart-item__info">
+        <p class="cart-item__name">${p.name}</p>
+        <p class="cart-item__price">$${p.price}</p>
+        <div class="cart-item__qty">
+          <button class="cart-item__remove" data-action="wish-add-cart" data-id="${p.id}" style="color:var(--gold);">Add to cart</button>
+          <button class="cart-item__remove" data-action="wish-remove" data-id="${p.id}">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
 /* -------- Cart state -------- */
 let cart = JSON.parse(localStorage.getItem("xxx_cart") || "[]");
 
@@ -222,18 +265,57 @@ function renderFilters(){
   ).join("");
 }
 
-function renderProducts(filter="all"){
+let currentCategory = "all";
+let currentSearch = "";
+let currentSort = "default";
+
+function isNewProduct(p){
+  if(!p.created_at) return false;
+  return (Date.now() - new Date(p.created_at).getTime()) / 86400000 <= 14;
+}
+
+function getVisibleProducts(){
+  let list = currentCategory === "all" ? PRODUCTS : PRODUCTS.filter(p=>p.category===currentCategory);
+
+  if(currentSearch){
+    const q = currentSearch.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q)
+    );
+  }
+
+  list = [...list];
+  if(currentSort === "price-asc") list.sort((a,b)=> a.price - b.price);
+  if(currentSort === "price-desc") list.sort((a,b)=> b.price - a.price);
+  if(currentSort === "name-asc") list.sort((a,b)=> a.name.localeCompare(b.name));
+  return list;
+}
+
+function renderProducts(){
   const grid = document.getElementById("productGrid");
-  const list = filter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.category===filter);
+  const list = getVisibleProducts();
 
   if(list.length === 0){
-    grid.innerHTML = `<p class="catalog-empty">New bottles are being added to this selection — check back soon.</p>`;
+    grid.innerHTML = `<p class="catalog-empty">${
+      PRODUCTS.length === 0
+        ? "New bottles are being added to this selection — check back soon."
+        : "No bottles match your search."
+    }</p>`;
     return;
   }
 
-  grid.innerHTML = list.map(p=>`
+  grid.innerHTML = list.map(p=>{
+    const outOfStock = p.in_stock === false;
+    const badge = outOfStock
+      ? `<span class="product-badge product-badge--out">Sold out</span>`
+      : (isNewProduct(p) ? `<span class="product-badge">New</span>` : "");
+    return `
     <article class="product-card">
       <div class="product-card__img">
+        ${badge}
+        <button class="wishlist-heart ${isWished(p.id) ? "is-active" : ""}" data-id="${p.id}" aria-label="Add to wishlist">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.5-4.6-9.8-9.2C.6 7.8 2.3 4.3 5.7 4c2-.2 3.6.9 4.8 2.6.4.5.6.8 1.5 2.2.9-1.4 1.1-1.7 1.5-2.2C14.7 4.9 16.3 3.8 18.3 4c3.4.3 5.1 3.8 3.5 7.3-2.3 4.6-9.8 9.2-9.8 9.2Z"/></svg>
+        </button>
         ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" data-id="${p.id}">` : bottleSVG(p)}
       </div>
       <div class="product-card__body">
@@ -241,11 +323,11 @@ function renderProducts(filter="all"){
         <p class="product-card__note">${p.description || ""}</p>
         <div class="product-card__foot">
           <span class="product-card__price">$${p.price}</span>
-          <button class="product-card__add" data-id="${p.id}">Add</button>
+          <button class="product-card__add ${outOfStock ? "is-disabled" : ""}" data-id="${p.id}">${outOfStock ? "Sold out" : "Add"}</button>
         </div>
       </div>
     </article>
-  `).join("");
+  `;}).join("");
 
   grid.querySelectorAll(".product-card__img img").forEach(img=>{
     img.addEventListener("error", ()=>{
@@ -318,6 +400,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const cartDrawer = document.getElementById("cartDrawer");
   const cartToggle = document.getElementById("cartToggle");
   const cartClose = document.getElementById("cartClose");
+  const wishlistDrawer = document.getElementById("wishlistDrawer");
+  const wishlistToggle = document.getElementById("wishlistToggle");
+  const wishlistClose = document.getElementById("wishlistClose");
 
   /* Shared body scroll lock — prevents the classic mobile "fixed panel
      jumps/flickers while the page scrolls behind it" glitch, and restores
@@ -336,7 +421,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
     window.scrollTo(0, lockedScrollY);
   }
   function syncBodyLock(){
-    const anyOpen = mainNav.classList.contains("is-open") || cartDrawer.classList.contains("is-open");
+    const anyOpen = mainNav.classList.contains("is-open")
+      || cartDrawer.classList.contains("is-open")
+      || wishlistDrawer.classList.contains("is-open");
     if(anyOpen) lockBodyScroll(); else unlockBodyScroll();
   }
 
@@ -359,10 +446,22 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   function openCart(){ cartDrawer.classList.add("is-open"); overlay.classList.add("is-active"); syncBodyLock(); }
   function closeCart(){ cartDrawer.classList.remove("is-open"); overlay.classList.remove("is-active"); syncBodyLock(); }
+  function openWishlist(){ wishlistDrawer.classList.add("is-open"); overlay.classList.add("is-active"); syncBodyLock(); }
+  function closeWishlist(){ wishlistDrawer.classList.remove("is-open"); overlay.classList.remove("is-active"); syncBodyLock(); }
 
   cartToggle.addEventListener("click", openCart);
   cartClose.addEventListener("click", closeCart);
-  overlay.addEventListener("click", ()=>{ closeCart(); closeMenu(); });
+  wishlistToggle.addEventListener("click", openWishlist);
+  wishlistClose.addEventListener("click", closeWishlist);
+  overlay.addEventListener("click", ()=>{ closeCart(); closeWishlist(); closeMenu(); });
+
+  document.getElementById("wishlistItems").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button[data-action]");
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === "wish-add-cart"){ addToCart(id); closeWishlist(); openCart(); }
+    if(btn.dataset.action === "wish-remove") toggleWishlist(id);
+  });
 
   /* Keep things sane if the viewport crosses the mobile breakpoint
      (e.g. rotating a tablet, or resizing a browser window) while open. */
@@ -374,7 +473,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   renderFilters();
   document.getElementById("productGrid").innerHTML = `<p class="catalog-empty">Loading the cellar…</p>`;
   fetchProducts()
-    .then(data=>{ PRODUCTS = data; renderProducts("all"); renderCart(); })
+    .then(data=>{ PRODUCTS = data; renderProducts(); renderCart(); renderWishlist(); })
     .catch(()=>{
       document.getElementById("productGrid").innerHTML =
         `<p class="catalog-empty">The cellar couldn't be loaded right now — please refresh the page.</p>`;
@@ -385,18 +484,36 @@ document.addEventListener("DOMContentLoaded", ()=>{
     if(!btn) return;
     document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("is-active"));
     btn.classList.add("is-active");
-    renderProducts(btn.dataset.cat);
+    currentCategory = btn.dataset.cat;
+    renderProducts();
   });
 
-  /* Add to cart */
+  document.getElementById("searchInput").addEventListener("input", (e)=>{
+    currentSearch = e.target.value.trim();
+    renderProducts();
+  });
+
+  document.getElementById("sortSelect").addEventListener("change", (e)=>{
+    currentSort = e.target.value;
+    renderProducts();
+  });
+
+  /* Add to cart / wishlist toggle */
   document.getElementById("productGrid").addEventListener("click", (e)=>{
-    const btn = e.target.closest(".product-card__add");
-    if(!btn) return;
-    addToCart(btn.dataset.id);
-    btn.textContent = "Added ✓";
-    btn.classList.add("is-added");
-    openCart();
-    setTimeout(()=>{ btn.textContent = "Add"; btn.classList.remove("is-added"); }, 1400);
+    const addBtn = e.target.closest(".product-card__add");
+    if(addBtn){
+      addToCart(addBtn.dataset.id);
+      addBtn.textContent = "Added ✓";
+      addBtn.classList.add("is-added");
+      openCart();
+      setTimeout(()=>{ addBtn.textContent = "Add"; addBtn.classList.remove("is-added"); }, 1400);
+      return;
+    }
+    const heartBtn = e.target.closest(".wishlist-heart");
+    if(heartBtn){
+      toggleWishlist(heartBtn.dataset.id);
+      heartBtn.classList.toggle("is-active", isWished(heartBtn.dataset.id));
+    }
   });
 
   /* Cart actions (qty / remove) */
@@ -423,9 +540,35 @@ document.addEventListener("DOMContentLoaded", ()=>{
     sendOrderToWhatsapp(name, phone, address, note);
   });
 
-  /* Contact section WhatsApp link */
-  document.getElementById("whatsappContact").href =
+  /* Contact section + floating WhatsApp links */
+  const whatsappGenericLink =
     `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello Whiskey & More, I'd like more information about your selection.")}`;
+  document.getElementById("whatsappContact").href = whatsappGenericLink;
+  document.getElementById("whatsappFloat").href = whatsappGenericLink;
+
+  /* Newsletter */
+  document.getElementById("newsletterForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const emailInput = document.getElementById("newsletterEmail");
+    const statusEl = document.getElementById("newsletterStatus");
+    const email = emailInput.value.trim();
+    statusEl.textContent = "Subscribing…";
+    try{
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/subscribers`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json", Prefer: "return=minimal",
+        },
+        body: JSON.stringify({ email }),
+      });
+      if(!res.ok) throw new Error("subscribe failed");
+      statusEl.textContent = "✓ Thank you, you're subscribed!";
+      emailInput.value = "";
+    } catch(err){
+      statusEl.textContent = "Something went wrong — please try again later.";
+    }
+  });
 
   /* Reveal sections */
   observeReveal(document.querySelectorAll(".intro, .maison__visual, .maison__content, .promise__item"));

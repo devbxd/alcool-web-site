@@ -46,6 +46,11 @@
   #status.ok{ color:#8fce9a; }
   #status.err{ color:#e08a8a; }
 
+  .checkbox-row{
+    display:flex; align-items:center; gap:10px; margin:20px 0 0; font-size:.9rem; color:var(--cream);
+  }
+  .checkbox-row input{ width:auto; }
+
   .list-head{
     font-family:'Playfair Display', serif; font-size:1.15rem; margin:60px 0 18px; text-align:center;
   }
@@ -99,6 +104,8 @@
     <label for="photo">Photo du produit</label>
     <input type="file" id="photo" accept="image/*">
 
+    <label class="checkbox-row"><input type="checkbox" id="inStock" checked> En stock</label>
+
     <button type="submit" id="submitBtn">Ajouter le produit</button>
     <p id="status"></p>
   </form>
@@ -146,7 +153,7 @@ async function loadProducts(){
       ${p.image_url ? `<img class="product-row__thumb" src="${p.image_url}">` : `<div class="product-row__thumb"></div>`}
       <div class="product-row__info">
         <div class="product-row__name">${p.name}</div>
-        <div class="product-row__meta">$${p.price} — ${p.category}</div>
+        <div class="product-row__meta">$${p.price} — ${p.category}${p.in_stock === false ? " — <span style='color:#e08a8a;'>Épuisé</span>" : ""}</div>
       </div>
       <button class="product-row__del" data-id="${p.id}">Supprimer</button>
     </div>
@@ -176,15 +183,24 @@ form.addEventListener("submit", async (e)=>{
     const category = document.getElementById("category").value;
     const description = document.getElementById("description").value.trim();
     const file = document.getElementById("photo").files[0];
+    const in_stock = document.getElementById("inStock").checked;
 
     let image_url = null;
     if(file) image_url = await uploadPhoto(file);
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
       method: "POST",
       headers: { ...H, "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify({ name, price, category, description, image_url }),
+      body: JSON.stringify({ name, price, category, description, image_url, in_stock }),
     });
+    if(!res.ok && res.status === 400){
+      // "in_stock" column not created yet in Supabase — retry without it
+      res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+        method: "POST",
+        headers: { ...H, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify({ name, price, category, description, image_url }),
+      });
+    }
     if(!res.ok) throw new Error("insert failed");
 
     form.reset();
