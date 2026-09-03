@@ -160,6 +160,15 @@ ul{ list-style:none; }
   min-width:177.78vh; min-height:100vh; /* 16:9, covers any viewport ratio */
   border:0; pointer-events:none;
 }
+@media (max-width:760px){
+  /* On tall/narrow phones the "cover" rule above has to blow the video
+     up a lot to fill the full height, cropping in tight on the subject.
+     Show the full frame instead (letterboxed) so nothing is over-zoomed. */
+  .hero__video-wrap iframe{
+    width:100vw; height:56.25vw;
+    min-width:0; min-height:0;
+  }
+}
 .hero__scrim{
   position:absolute; inset:0;
   background:linear-gradient(180deg, rgba(11,10,9,.55) 0%, rgba(11,10,9,.15) 30%, rgba(11,10,9,.35) 60%, rgba(11,10,9,.92) 100%);
