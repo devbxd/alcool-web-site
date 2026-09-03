@@ -1,5 +1,5 @@
 /* =========================================================
-   XXX — Maison de Spiritueux d'Exception
+   Whiskey & More — Maison de Spiritueux d'Exception
    ========================================================= */
 
 :root{
@@ -299,7 +299,7 @@ ul{ list-style:none; }
     linear-gradient(160deg, var(--panel) 0%, var(--black-soft) 100%);
 }
 .maison__frame::before{
-  content:"XXX"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  content:"Whiskey & More"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-family:var(--serif); font-size:2.4rem; letter-spacing:.2em; color:rgba(200,168,98,.35);
 }
 .maison__content p{ color:var(--cream-dim); margin-top:18px; font-size:1rem; }

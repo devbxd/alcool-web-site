@@ -1,5 +1,5 @@
 /* =========================================================
-   XXX — House of Fine Spirits
+   Whiskey & More — House of Fine Spirits
    Catalog, cart, WhatsApp ordering
    ========================================================= */
 
@@ -330,7 +330,7 @@ function observeReveal(nodes){
 
 /* -------- WhatsApp ordering -------- */
 function buildOrderMessage(name, phone, address, note){
-  let msg = `Hello XXX, I'd like to place the following order:\n\n`;
+  let msg = `Hello Whiskey & More, I'd like to place the following order:\n\n`;
   cart.forEach(item=>{
     msg += `• ${item.name} — x${item.qty} — $${item.price*item.qty}\n`;
   });
@@ -476,7 +476,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   /* Contact section WhatsApp link */
   document.getElementById("whatsappContact").href =
-    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello XXX, I'd like more information about your selection.")}`;
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello Whiskey & More, I'd like more information about your selection.")}`;
 
   /* Reveal sections */
   observeReveal(document.querySelectorAll(".intro, .maison__visual, .maison__content, .promise__item"));
