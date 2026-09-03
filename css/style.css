@@ -80,8 +80,10 @@ ul{ list-style:none; }
 .age-gate[hidden]{ opacity:0; visibility:hidden; pointer-events:none; }
 .age-gate__panel{ max-width:460px; text-align:center; }
 .age-gate__mark{
-  font-family:var(--serif); font-size:1.6rem; letter-spacing:.3em; color:var(--gold); margin-bottom:28px;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  font-family:var(--serif); font-size:1.4rem; letter-spacing:.3em; color:var(--gold); margin-bottom:28px;
 }
+.age-gate__mark .brand__mark{ width:34px; }
 .age-gate__panel h2{ font-family:var(--serif); font-weight:500; font-size:1.7rem; margin-bottom:16px; }
 .age-gate__text{ color:var(--cream-dim); font-size:.92rem; margin-bottom:32px; }
 .age-gate__actions{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
@@ -112,8 +114,10 @@ ul{ list-style:none; }
   display:flex; align-items:center; justify-content:space-between;
 }
 .brand{
+  display:flex; align-items:center; gap:11px;
   font-family:var(--serif); font-weight:700; font-size:1.5rem; letter-spacing:.12em; color:var(--cream);
 }
+.brand__mark{ width:24px; height:auto; flex-shrink:0; }
 .main-nav{ display:flex; gap:44px; }
 .nav-link{
   font-size:.76rem; letter-spacing:.16em; text-transform:uppercase; color:var(--cream-dim);
@@ -298,10 +302,8 @@ ul{ list-style:none; }
     radial-gradient(ellipse at 30% 20%, rgba(200,168,98,.14), transparent 60%),
     linear-gradient(160deg, var(--panel) 0%, var(--black-soft) 100%);
 }
-.maison__frame::before{
-  content:"Whiskey & More"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:var(--serif); font-size:2.4rem; letter-spacing:.2em; color:rgba(200,168,98,.35);
-}
+.maison__frame{ display:flex; align-items:center; justify-content:center; }
+.maison__mark{ width:38%; max-width:180px; opacity:.3; }
 .maison__content p{ color:var(--cream-dim); margin-top:18px; font-size:1rem; }
 .maison__content .section-head__kicker,
 .maison__content .section-head__title{ text-align:left; }
@@ -337,7 +339,11 @@ ul{ list-style:none; }
   max-width:1280px; margin:0 auto; display:flex; align-items:center; justify-content:space-between;
   flex-wrap:wrap; gap:24px; margin-bottom:30px;
 }
-.site-footer__brand{ font-family:var(--serif); font-size:1.2rem; letter-spacing:.1em; }
+.site-footer__brand{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--serif); font-size:1.2rem; letter-spacing:.1em;
+}
+.site-footer__brand .brand__mark{ width:19px; }
 .site-footer__nav{ display:flex; gap:32px; }
 .site-footer__nav a{ font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--cream-dim); }
 .site-footer__nav a:hover{ color:var(--gold); }
