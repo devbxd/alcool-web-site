@@ -75,81 +75,21 @@ function mountHeroVideo(){
   };
 }
 
-/* -------- Catalog --------
-   Indicative prices in line with typical market rates (USD).
-   Adjust freely to match your real pricing. */
-const PRODUCTS = [
-  // Whisky
-  { id:"w1",  cat:"whisky",   name:"Macallan 12 Double Cask",        origin:"Scotland",  price:75,   note:"Single malt with notes of vanilla and dried fruit." },
-  { id:"w2",  cat:"whisky",   name:"Macallan 18 Sherry Oak",         origin:"Scotland",  price:450,  note:"Matured in Spanish sherry seasoned oak casks." },
-  { id:"w3",  cat:"whisky",   name:"Macallan Rare Cask",             origin:"Scotland",  price:650,  note:"Rare edition, intense woody profile." },
-  { id:"w4",  cat:"whisky",   name:"Johnnie Walker Blue Label",      origin:"Scotland",  price:220,  note:"A rare blend of exceptional whiskies." },
-  { id:"w5",  cat:"whisky",   name:"Johnnie Walker Black Label",     origin:"Scotland",  price:45,   note:"Aged 12 years, smoky and smooth." },
-  { id:"w6",  cat:"whisky",   name:"Chivas Regal 18 Years",          origin:"Scotland",  price:85,   note:"Rich, silky blend." },
-  { id:"w7",  cat:"whisky",   name:"Glenfiddich 21 Gran Reserva",    origin:"Scotland",  price:260,  note:"Finished in Caribbean rum casks." },
-  { id:"w8",  cat:"whisky",   name:"The Glenlivet 18",               origin:"Scotland",  price:130,  note:"Fruity, spiced, long finish." },
-  { id:"w9",  cat:"whisky",   name:"Hibiki Harmony",                 origin:"Japan",     price:150,  note:"Japanese blend, floral balance." },
-  { id:"w10", cat:"whisky",   name:"Yamazaki 12",                    origin:"Japan",     price:180,  note:"Iconic Japanese single malt." },
-  { id:"w11", cat:"whisky",   name:"Lagavulin 16",                   origin:"Scotland",  price:95,   note:"Peated, intense, pure Islay." },
-  { id:"w12", cat:"whisky",   name:"The Dalmore 15",                 origin:"Scotland",  price:140,  note:"Notes of leather and candied orange." },
-  { id:"w13", cat:"whisky",   name:"Royal Salute 21",                origin:"Scotland",  price:220,  note:"A royal blend, aged 21 years." },
-  { id:"w14", cat:"whisky",   name:"Balvenie 14 Caribbean Cask",     origin:"Scotland",  price:90,   note:"Rum-cask sweetness, round finish." },
-  { id:"w15", cat:"whisky",   name:"Jack Daniel's Single Barrel",    origin:"USA",       price:55,   note:"Tennessee whiskey, single barrel." },
+/* -------- Catalog (Supabase) --------
+   Products are managed by the client on the /admin.html page — nothing
+   is hardcoded here anymore. This just reads what's in the database. */
+const SUPABASE_URL = "https://jpxlqismhmgwhkrzqcvc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_oNU9YVWCPeJQrE4wJbeHvA_ihyg3m2h";
 
-  // Vodka
-  { id:"v1",  cat:"vodka",    name:"Grey Goose",                     origin:"France",       price:45,  note:"French wheat, pure distillation." },
-  { id:"v2",  cat:"vodka",    name:"Belvedere",                      origin:"Poland",       price:48,  note:"Polish rye, silky texture." },
-  { id:"v3",  cat:"vodka",    name:"Beluga Noble",                   origin:"Russia",       price:55,  note:"Milk thistle filtered, exceptionally pure." },
-  { id:"v4",  cat:"vodka",    name:"Crystal Head",                   origin:"Canada",       price:60,  note:"Iconic skull bottle, quadruple distilled." },
-  { id:"v5",  cat:"vodka",    name:"Cîroc",                          origin:"France",       price:42,  note:"Distilled from fine grapes." },
-  { id:"v6",  cat:"vodka",    name:"Absolut Elyx",                   origin:"Sweden",       price:50,  note:"Crafted in vintage copper stills." },
-  { id:"v7",  cat:"vodka",    name:"Ketel One",                      origin:"Netherlands",  price:38,  note:"Traditional method, remarkably smooth." },
-  { id:"v8",  cat:"vodka",    name:"Chopin Potato",                  origin:"Poland",       price:45,  note:"100% potato, creamy texture." },
-  { id:"v9",  cat:"vodka",    name:"Stolichnaya Elit",               origin:"Russia",       price:65,  note:"Extreme cold filtration." },
-  { id:"v10", cat:"vodka",    name:"Russian Standard Platinum",      origin:"Russia",       price:40,  note:"Triple distilled, clean finish." },
+let PRODUCTS = [];
 
-  // Tequila
-  { id:"t1",  cat:"tequila",  name:"Don Julio 1942",                 origin:"Mexico", price:180, note:"Exceptional añejo, prestige box." },
-  { id:"t2",  cat:"tequila",  name:"Don Julio Blanco",               origin:"Mexico", price:55,  note:"Pure agave, intense freshness." },
-  { id:"t3",  cat:"tequila",  name:"Patrón Silver",                  origin:"Mexico", price:50,  note:"Smooth agave, no additives." },
-  { id:"t4",  cat:"tequila",  name:"Patrón Añejo",                   origin:"Mexico", price:75,  note:"Aged in oak barrels." },
-  { id:"t5",  cat:"tequila",  name:"Casamigos Blanco",               origin:"Mexico", price:48,  note:"Soft, round profile." },
-  { id:"t6",  cat:"tequila",  name:"Clase Azul Reposado",            origin:"Mexico", price:220, note:"Hand-painted artisanal decanter." },
-  { id:"t7",  cat:"tequila",  name:"1800 Añejo",                     origin:"Mexico", price:60,  note:"Vanilla and oak notes." },
-
-  // Cognac
-  { id:"c1",  cat:"cognac",   name:"Hennessy XO",                    origin:"France", price:220,  note:"Rare blend, candied fruit notes." },
-  { id:"c2",  cat:"cognac",   name:"Hennessy VS",                    origin:"France", price:50,   note:"Bold and intense." },
-  { id:"c3",  cat:"cognac",   name:"Rémy Martin XO",                 origin:"France", price:210,  note:"Grande Champagne, floral notes." },
-  { id:"c4",  cat:"cognac",   name:"Louis XIII",                     origin:"France", price:3800, note:"A blend of eaux-de-vie up to 100 years old — a true masterpiece." },
-  { id:"c5",  cat:"cognac",   name:"Courvoisier VSOP",               origin:"France", price:55,   note:"Balance of fruit and oak." },
-  { id:"c6",  cat:"cognac",   name:"Martell Cordon Bleu",            origin:"France", price:150,  note:"Classic elegance since 1912." },
-
-  // Champagne
-  { id:"ch1", cat:"champagne", name:"Dom Pérignon 2013",             origin:"France", price:220, note:"Prestige vintage, absolute finesse." },
-  { id:"ch2", cat:"champagne", name:"Moët & Chandon Impérial",       origin:"France", price:60,  note:"Iconic brut, fruity and vibrant." },
-  { id:"ch3", cat:"champagne", name:"Veuve Clicquot Brut",           origin:"France", price:65,  note:"Pinot noir led, ample structure." },
-  { id:"ch4", cat:"champagne", name:"Cristal Louis Roederer",        origin:"France", price:320, note:"Legendary cuvée in a gold-hued bottle." },
-  { id:"ch5", cat:"champagne", name:"Ruinart Blanc de Blancs",       origin:"France", price:95,  note:"Pure chardonnay, great finesse." },
-
-  // Wines
-  { id:"vin1", cat:"vins", name:"Château Musar 2015",                origin:"Lebanon", price:55,  note:"A Lebanese icon, cellar-worthy red." },
-  { id:"vin2", cat:"vins", name:"Château Ksara Réserve du Couvent",  origin:"Lebanon", price:35,  note:"A blend from Lebanon's oldest winery." },
-  { id:"vin3", cat:"vins", name:"Château Margaux 2015",              origin:"France",  price:650, note:"First growth grand cru, Bordeaux." },
-  { id:"vin4", cat:"vins", name:"Opus One 2018",                     origin:"USA",     price:420, note:"Napa Valley, prestige blend." },
-  { id:"vin5", cat:"vins", name:"Château Lafite Rothschild",         origin:"France",  price:850, note:"One of the five first growths." },
-  { id:"vin6", cat:"vins", name:"Sassicaia 2019",                    origin:"Italy",   price:250, note:"Super Tuscan, power and elegance." },
-
-  // Rum
-  { id:"r1",  cat:"rhum",     name:"Diplomático Reserva Exclusiva",  origin:"Venezuela", price:50, note:"Round, notes of cocoa and raisin." },
-  { id:"r2",  cat:"rhum",     name:"Zacapa 23",                      origin:"Guatemala", price:70, note:"Aged at altitude, exceptionally smooth." },
-  { id:"r3",  cat:"rhum",     name:"Plantation XO 20th Anniversary", origin:"Barbados",  price:65, note:"Spiced, oaky finish." },
-
-  // Gin
-  { id:"g1",  cat:"gin",      name:"Hendrick's",                     origin:"Scotland", price:42,  note:"Cucumber and rose, highly aromatic." },
-  { id:"g2",  cat:"gin",      name:"The Botanist",                   origin:"Scotland", price:48,  note:"22 wild Islay botanicals." },
-  { id:"g3",  cat:"gin",      name:"Monkey 47",                      origin:"Germany",  price:55,  note:"47 botanicals, rare intensity." },
-];
+async function fetchProducts(){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.desc`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  });
+  if(!res.ok) throw new Error("Failed to load products");
+  return res.json();
+}
 
 const CATEGORIES = [
   { key:"all",       label:"Whole Cellar" },
@@ -169,10 +109,9 @@ const CATEGORY_TINT = {
 };
 
 /* -------- Illustrated placeholder (bottle) --------
-   Until real product photography is ready: drop images into
-   assets/products/<id>.jpg — they will automatically replace this visual. */
+   Shown until the client uploads a real photo for a product. */
 function bottleSVG(product){
-  const tint = CATEGORY_TINT[product.cat] || "#a9752c";
+  const tint = CATEGORY_TINT[product.category] || "#a9752c";
   const words = product.name.split(" ");
   let lines = [], current = "";
   words.forEach(w=>{
@@ -285,17 +224,21 @@ function renderFilters(){
 
 function renderProducts(filter="all"){
   const grid = document.getElementById("productGrid");
-  const list = filter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===filter);
+  const list = filter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.category===filter);
+
+  if(list.length === 0){
+    grid.innerHTML = `<p class="catalog-empty">New bottles are being added to this selection — check back soon.</p>`;
+    return;
+  }
 
   grid.innerHTML = list.map(p=>`
     <article class="product-card">
       <div class="product-card__img">
-        <img src="assets/products/${p.id}.jpg" alt="${p.name}" data-id="${p.id}">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" data-id="${p.id}">` : bottleSVG(p)}
       </div>
       <div class="product-card__body">
-        <p class="product-card__origin">${p.origin}</p>
         <h3 class="product-card__name">${p.name}</h3>
-        <p class="product-card__note">${p.note}</p>
+        <p class="product-card__note">${p.description || ""}</p>
         <div class="product-card__foot">
           <span class="product-card__price">$${p.price}</span>
           <button class="product-card__add" data-id="${p.id}">Add</button>
@@ -429,7 +372,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   /* Filters + grid */
   renderFilters();
-  renderProducts("all");
+  document.getElementById("productGrid").innerHTML = `<p class="catalog-empty">Loading the cellar…</p>`;
+  fetchProducts()
+    .then(data=>{ PRODUCTS = data; renderProducts("all"); renderCart(); })
+    .catch(()=>{
+      document.getElementById("productGrid").innerHTML =
+        `<p class="catalog-empty">The cellar couldn't be loaded right now — please refresh the page.</p>`;
+    });
 
   document.getElementById("filters").addEventListener("click", (e)=>{
     const btn = e.target.closest(".filter-btn");

@@ -255,6 +255,10 @@ ul{ list-style:none; }
 .product-grid{
   display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:34px 28px;
 }
+.catalog-empty{
+  grid-column:1/-1; text-align:center; color:var(--cream-dim);
+  font-family:var(--script); font-style:italic; font-size:1.15rem; padding:60px 20px;
+}
 .product-card{
   background:var(--panel); border:1px solid var(--line);
   display:flex; flex-direction:column; opacity:0; transform:translateY(18px);
