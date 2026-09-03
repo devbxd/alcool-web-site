@@ -18,16 +18,42 @@ function getYouTubeId(url){
   return null;
 }
 
+function forceTopQuality(player){
+  // YouTube auto-throttles muted background loops (esp. on mobile data).
+  // Nudge it back up to the best available level whenever it drops.
+  try{
+    const levels = player.getAvailableQualityLevels();
+    if(levels && levels.length) player.setPlaybackQuality(levels[0]);
+  } catch(e){}
+}
+
 function mountHeroVideo(){
   const wrap = document.getElementById("heroVideoWrap");
   if(!wrap) return;
   const id = getYouTubeId(YOUTUBE_URL);
   if(!id) return; // no link set yet — hero keeps its dark background
-  const iframe = document.createElement("iframe");
-  iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&cc_load_policy=0&cc_lang_pref=none`;
-  iframe.title = "Background video";
-  iframe.allow = "autoplay; encrypted-media";
-  wrap.appendChild(iframe);
+
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function(){
+    const player = new YT.Player("heroVideoWrap", {
+      videoId: id,
+      playerVars: {
+        autoplay: 1, mute: 1, loop: 1, playlist: id,
+        controls: 0, showinfo: 0, rel: 0, modestbranding: 1,
+        playsinline: 1, iv_load_policy: 3, disablekb: 1,
+        cc_load_policy: 0, cc_lang_pref: "none",
+        vq: "hd1080", origin: window.location.origin,
+      },
+      events: {
+        onReady: (e)=>{ e.target.mute(); forceTopQuality(e.target); e.target.playVideo(); },
+        onPlaybackQualityChange: (e)=> forceTopQuality(e.target),
+        onStateChange: (e)=>{ if(e.data === YT.PlayerState.PLAYING) forceTopQuality(e.target); },
+      }
+    });
+  };
 }
 
 /* -------- Catalog --------
