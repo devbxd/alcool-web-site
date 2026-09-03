@@ -24,7 +24,7 @@ function mountHeroVideo(){
   const id = getYouTubeId(YOUTUBE_URL);
   if(!id) return; // no link set yet — hero keeps its dark background
   const iframe = document.createElement("iframe");
-  iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1`;
+  iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&cc_load_policy=0&cc_lang_pref=none`;
   iframe.title = "Background video";
   iframe.allow = "autoplay; encrypted-media";
   wrap.appendChild(iframe);
